@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvia Waitlist - API Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .result {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .result.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      display: block;
+    }
+    
+    .result.error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      display: block;
+    }
+    
+    .result h3 {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    
+    .result p {
+      margin: 5px 0;
+    }
+    
+    .referral-code {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 18px;
+      color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Join Nuvia Waitlist</h1>
+    <p class="subtitle">Be the first to experience the future of DeFi</p>
+    
+    <form id="waitlistForm">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="your@email.com"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="wallet">Wallet Address</label>
+        <input 
+          type="text" 
+          id="wallet" 
+          name="wallet" 
+          placeholder="0x..."
+          pattern="^0x[a-fA-F0-9]{40}$"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="referral">Referral Code (Optional)</label>
+        <input 
+          type="text" 
+          id="referral" 
+          name="referral" 
+          placeholder="Enter referral code"
+          maxlength="8"
+        >
+      </div>
+      
+      <button type="submit" id="submitBtn">Join Waitlist</button>
+    </form>
+    
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api/waitlist';
+    
+    document.getElementById('waitlistForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const resultDiv = document.getElementById('result');
+      
+      // Get form values
+      const email = document.getElementById('email').value;
+      const walletAddress = document.getElementById('wallet').value;
+      const referredBy = document.getElementById('referral').value;
+      
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Joining...';
+      resultDiv.style.display = 'none';
+      
+      try {
+        const response = await fetch(`${API_URL}/join`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            walletAddress,
+            referredBy: referredBy || undefined,
+            source: 'web'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.className = 'result success';
+          resultDiv.innerHTML = `
+            <h3>✅ Successfully Joined!</h3>
+            <p><strong>Position:</strong> #${data.data.position}</p>
+            <p><strong>Your Referral Code:</strong> <span class="referral-code">${data.data.referralCode}</span></p>
+            <p>Share your referral code to move up in the waitlist!</p>
+          `;
+          
+          // Reset form
+          document.getElementById('waitlistForm').reset();
+        } else {
+          resultDiv.className = 'result error';
+          resultDiv.innerHTML = `
+            <h3>❌ Error</h3>
+            <p>${data.message}</p>
+          `;
+        }
+      } catch (error) {
+        resultDiv.className = 'result error';
+        resultDiv.innerHTML = `
+          <h3>❌ Connection Error</h3>
+          <p>Failed to connect to the server. Make sure the backend is running.</p>
+        `;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Join Waitlist';
+      }
+    });
+  </script>
+</body>
+</html>

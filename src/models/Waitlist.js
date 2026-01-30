@@ -1,0 +1,116 @@
+const mongoose = require('mongoose');
+const { customAlphabet } = require('nanoid');
+
+// Generate custom referral code: uppercase letters and numbers, 8 characters
+const generateReferralCode = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 8);
+
+const waitlistSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      'Please provide a valid email address'
+    ]
+  },
+  walletAddress: {
+    type: String,
+    required: [true, 'Wallet address is required'],
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [
+      /^0x[a-fA-F0-9]{40}$/,
+      'Please provide a valid Ethereum wallet address'
+    ]
+  },
+  referralCode: {
+    type: String,
+    unique: true,
+    uppercase: true,
+    index: true
+  },
+  referredBy: {
+    type: String,
+    uppercase: true,
+    default: null
+  },
+  position: {
+    type: Number,
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  metadata: {
+    ipAddress: String,
+    userAgent: String,
+    source: String,
+    referralCount: {
+      type: Number,
+      default: 0
+    }
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes for performance
+waitlistSchema.index({ email: 1 });
+waitlistSchema.index({ walletAddress: 1 });
+waitlistSchema.index({ referralCode: 1 });
+waitlistSchema.index({ createdAt: 1 });
+
+// Pre-save middleware to generate referral code and position
+waitlistSchema.pre('save', async function(next) {
+  if (this.isNew) {
+    // Generate unique referral code
+    let code;
+    let isUnique = false;
+    
+    while (!isUnique) {
+      code = generateReferralCode();
+      const existing = await this.constructor.findOne({ referralCode: code });
+      if (!existing) {
+        isUnique = true;
+      }
+    }
+    
+    this.referralCode = code;
+
+    // Calculate position (total count + 1)
+    const count = await this.constructor.countDocuments();
+    this.position = count + 1;
+  }
+  
+  next();
+});
+
+// Static method to update referral count
+waitlistSchema.statics.incrementReferralCount = async function(referralCode) {
+  return this.findOneAndUpdate(
+    { referralCode },
+    { $inc: { 'metadata.referralCount': 1 } },
+    { new: true }
+  );
+};
+
+// Instance method to get user stats
+waitlistSchema.methods.getStats = function() {
+  return {
+    position: this.position,
+    referralCode: this.referralCode,
+    referralCount: this.metadata.referralCount || 0,
+    joinedAt: this.createdAt,
+    status: this.status
+  };
+};
+
+const Waitlist = mongoose.model('Waitlist', waitlistSchema);
+
+module.exports = Waitlist;

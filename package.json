@@ -1,0 +1,38 @@
+{
+  "name": "nuvia-waitlist-backend",
+  "version": "1.0.0",
+  "description": "Waitlist backend for Nuvia Web3 project",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/scripts/seed.script.js",
+    "migrate": "node src/scripts/migrate.script.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "waitlist",
+    "web3",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-validator": "^7.0.1",
+    "express-rate-limit": "^7.1.5",
+    "nanoid": "^3.3.7",
+    "ethers": "^6.9.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
