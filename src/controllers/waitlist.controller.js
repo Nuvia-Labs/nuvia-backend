@@ -1,4 +1,6 @@
 const Waitlist = require('../models/Waitlist');
+const User = require('../models/User');
+const XPLedger = require('../models/XPLedger');
 
 /**
  * Join waitlist
@@ -52,9 +54,29 @@ exports.joinWaitlist = async (req, res, next) => {
 
     await waitlistEntry.save();
 
-    // Update referrer's count if applicable
+    // Update referrer's count and reward XP if applicable
     if (referrer) {
       await Waitlist.incrementReferralCount(referrer.referralCode);
+
+      // Find or create user for the referrer and give 100 XP
+      let referrerUser = await User.findOne({ walletAddress: referrer.walletAddress });
+
+      if (referrerUser) {
+        // Give 100 XP to referrer
+        const referralXP = parseInt(process.env.WAITLIST_REFERRAL_XP) || 100;
+
+        await XPLedger.addXP(
+          referrerUser._id,
+          referralXP,
+          'other',
+          `Waitlist referral reward - ${email} joined using your code`,
+          {
+            waitlistId: waitlistEntry._id,
+            inviteeEmail: email,
+            inviteeWallet: walletAddress
+          }
+        );
+      }
     }
 
     // Return success response
