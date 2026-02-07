@@ -28,7 +28,7 @@ exports.joinWaitlist = async (req, res, next) => {
       });
     }
 
-    // Check if this wallet already has a User account (use their referral code)
+    // Check if this wallet already has a User account (or create one)
     const normalizedWallet = walletAddress.toLowerCase();
     console.log('🔍 Looking for User with wallet:', normalizedWallet);
 
@@ -36,14 +36,23 @@ exports.joinWaitlist = async (req, res, next) => {
     let assignedReferralCode = null;
 
     console.log('👤 Found User:', existingUser ? 'YES' : 'NO');
-    if (existingUser) {
-      console.log('   User referralCode:', existingUser.referralCode);
-    }
 
     if (existingUser) {
-      // Use the User's referral code for consistency
+      console.log('   User referralCode:', existingUser.referralCode);
       assignedReferralCode = existingUser.referralCode;
-      console.log('✅ Will use User referral code:', assignedReferralCode);
+      console.log('✅ Will use existing User referral code:', assignedReferralCode);
+    } else {
+      // Create User account automatically when joining waitlist
+      console.log('👤 Creating new User account...');
+
+      const newUser = await User.create({
+        walletAddress: normalizedWallet,
+        email: email // Also save email to User
+      });
+
+      assignedReferralCode = newUser.referralCode;
+      console.log('✅ Created User with referralCode:', assignedReferralCode);
+      existingUser = newUser;
     }
 
     // Validate referral code if provided (check both User and Waitlist)
