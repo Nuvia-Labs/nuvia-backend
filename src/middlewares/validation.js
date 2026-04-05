@@ -9,8 +9,7 @@ exports.joinWaitlistValidation = [
     .notEmpty()
     .withMessage('Email is required')
     .isEmail()
-    .withMessage('Please provide a valid email address')
-    .normalizeEmail(),
+    .withMessage('Please provide a valid email address'),
   
   body('walletAddress')
     .trim()
