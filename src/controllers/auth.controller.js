@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Waitlist = require('../models/Waitlist');
+const Referral = require('../models/Referral');
 const web3Service = require('../services/web3.service');
 const logger = require('../utils/logger');
 
@@ -204,17 +205,22 @@ exports.verifySignature = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
+    const referralStats = await Referral.getReferralStats(req.user.userId);
+
     res.status(200).json({
       success: true,
-      data: user.getStats()
+      data: {
+        ...user.getStats(),
+        total_referral: referralStats.total
+      }
     });
   } catch (error) {
     logger.error('Get me error', {
