@@ -8,6 +8,7 @@ router.get('/verify/:code', referralController.verifyReferralCode);
 
 // Protected routes
 router.get('/me', protect, referralController.getMyReferral);
+router.post('/apply', protect, referralController.applyReferral);
 router.post('/track', protect, referralController.trackReferral);
 router.get('/history', protect, referralController.getMyReferralHistory);
 

@@ -102,6 +102,47 @@ exports.getMyReferralHistory = async (req, res) => {
   }
 };
 
+// @desc    Apply referral code (increment referrer's count)
+// @route   POST /api/referral/apply
+// @access  Private
+exports.applyReferral = async (req, res) => {
+  try {
+    const { referralCode } = req.body;
+    const userId = req.user.userId;
+
+    if (!referralCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Referral code is required'
+      });
+    }
+
+    const metadata = {
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+      source: req.body.source || 'web'
+    };
+
+    const result = await referralService.applyReferral(referralCode, userId, metadata);
+
+    const statusCode = result.success ? 200 : 400;
+
+    res.status(statusCode).json(result);
+  } catch (error) {
+    logger.error('Apply referral error', {
+      error: error.message,
+      userId: req.user?.userId,
+      requestId: req.requestId
+    });
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to apply referral code',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 // @desc    Verify referral code
 // @route   GET /api/referral/verify/:code
 // @access  Public

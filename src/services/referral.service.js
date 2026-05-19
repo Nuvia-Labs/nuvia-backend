@@ -146,6 +146,84 @@ class ReferralService {
     }
   }
   
+  // Apply referral code — increment referrer's count and create referral record
+  async applyReferral(referralCode, inviteeUserId, metadata = {}) {
+    try {
+      const upperCode = referralCode.toUpperCase();
+
+      // Find referrer by referral code in User collection
+      const referrer = await User.findOne({ referralCode: upperCode });
+
+      if (!referrer) {
+        return {
+          success: false,
+          message: 'Invalid referral code'
+        };
+      }
+
+      // Prevent self-referral
+      if (referrer._id.toString() === inviteeUserId.toString()) {
+        return {
+          success: false,
+          message: 'Cannot use your own referral code'
+        };
+      }
+
+      // Check if invitee already has a referral record
+      const existingReferral = await Referral.findOne({ inviteeUserId });
+      if (existingReferral) {
+        return {
+          success: false,
+          message: 'Referral code already applied'
+        };
+      }
+
+      // Create referral record
+      const referral = await Referral.createReferral(
+        referrer._id,
+        inviteeUserId,
+        upperCode,
+        metadata
+      );
+
+      // Increment referrer's waitlist referral count
+      const Waitlist = require('../models/Waitlist');
+      await Waitlist.incrementReferralCount(upperCode);
+
+      logger.info('Referral applied', {
+        referralId: referral._id,
+        inviterId: referrer._id,
+        inviteeId: inviteeUserId,
+        referralCode: upperCode
+      });
+
+      return {
+        success: true,
+        data: {
+          referralId: referral._id,
+          referrerCode: upperCode,
+          status: referral.status
+        },
+        message: 'Referral code applied successfully'
+      };
+    } catch (error) {
+      if (error.message.includes('already been referred')) {
+        return {
+          success: false,
+          message: error.message
+        };
+      }
+
+      logger.error('Apply referral error', {
+        error: error.message,
+        referralCode,
+        inviteeUserId
+      });
+
+      throw error;
+    }
+  }
+
   // Verify referral code exists
   async verifyReferralCode(referralCode) {
     try {
