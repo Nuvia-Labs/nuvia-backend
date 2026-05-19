@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Waitlist = require('../models/Waitlist');
+const Referral = require('../models/Referral');
 const web3Service = require('../services/web3.service');
 const logger = require('../utils/logger');
 
@@ -212,13 +213,25 @@ exports.getMe = async (req, res) => {
       });
     }
 
-    const waitlistEntry = await Waitlist.findOne({ referralCode: user.referralCode });
+    const [waitlistEntry, referralCount, appliedReferral] = await Promise.all([
+      Waitlist.findOne({ referralCode: user.referralCode }),
+      Referral.countDocuments({ inviterUserId: user._id }),
+      Referral.findOne({ inviteeUserId: user._id }).select('referralCode status')
+    ]);
+
+    // Use higher of Waitlist metadata count or Referral collection count
+    const waitlistCount = waitlistEntry?.metadata?.referralCount || 0;
+    const totalReferral = Math.max(waitlistCount, referralCount);
 
     res.status(200).json({
       success: true,
       data: {
         ...user.getStats(),
-        total_referral: waitlistEntry?.metadata?.referralCount || 0
+        total_referral: totalReferral,
+        referral_applied: appliedReferral ? {
+          code: appliedReferral.referralCode,
+          status: appliedReferral.status
+        } : null
       }
     });
   } catch (error) {
