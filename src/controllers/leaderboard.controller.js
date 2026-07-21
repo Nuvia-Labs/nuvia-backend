@@ -58,13 +58,10 @@ exports.getMyRank = async (req, res) => {
     }
     
     const data = await leaderboardService.getUserRank(userId, period);
-    
-    const statusCode = data.found ? 200 : 404;
-    
-    res.status(statusCode).json({
-      success: data.found,
-      data: data.found ? data : null,
-      message: data.message
+
+    res.status(200).json({
+      success: true,
+      data
     });
   } catch (error) {
     logger.error('Get my rank error', {

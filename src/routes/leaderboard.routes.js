@@ -65,7 +65,7 @@ router.get('/', leaderboardController.getLeaderboard);
  *   get:
  *     tags: [Leaderboard]
  *     summary: Get my rank
- *     description: Get current user's rank in leaderboard
+ *     description: Get current user's rank in leaderboard. Always returns HTTP 200; check data.found to see if the user is ranked.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -77,7 +77,7 @@ router.get('/', leaderboardController.getLeaderboard);
  *           default: all-time
  *     responses:
  *       200:
- *         description: Rank retrieved successfully
+ *         description: Request succeeded. data.found indicates whether the user is ranked.
  *         content:
  *           application/json:
  *             schema:
@@ -96,6 +96,9 @@ router.get('/', leaderboardController.getLeaderboard);
  *                     score:
  *                       type: number
  *                       example: 250
+ *                     message:
+ *                       type: string
+ *                       description: Present when found is false
  */
 router.get('/me', protect, leaderboardController.getMyRank);
 
