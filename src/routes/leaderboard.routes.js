@@ -15,7 +15,7 @@ const { protect, adminOnly } = require('../middlewares/authMiddleware');
  *         name: period
  *         schema:
  *           type: string
- *           enum: [all-time, daily, weekly]
+ *           enum: [all-time, daily, weekly, monthly]
  *           default: all-time
  *         description: Leaderboard period
  *       - in: query
@@ -73,7 +73,7 @@ router.get('/', leaderboardController.getLeaderboard);
  *         name: period
  *         schema:
  *           type: string
- *           enum: [all-time, daily, weekly]
+ *           enum: [all-time, daily, weekly, monthly]
  *           default: all-time
  *     responses:
  *       200:
@@ -111,7 +111,7 @@ router.get('/me', protect, leaderboardController.getMyRank);
  *         name: period
  *         schema:
  *           type: string
- *           enum: [all-time, daily, weekly]
+ *           enum: [all-time, daily, weekly, monthly]
  *           default: all-time
  *     responses:
  *       200:
@@ -137,7 +137,7 @@ router.get('/snapshot/latest', leaderboardController.getLatestSnapshot);
  *             properties:
  *               period:
  *                 type: string
- *                 enum: [all-time, daily, weekly]
+ *                 enum: [all-time, daily, weekly, monthly]
  *                 default: all-time
  *     responses:
  *       200:

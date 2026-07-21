@@ -113,4 +113,29 @@ router.post('/verify', authController.verifySignature);
  */
 router.get('/me', protect, authController.getMe);
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Logout current user
+ *     description: Invalidate the current session. Auth is stateless JWT, so this is a no-op on the server beyond confirming the token was valid; the client is responsible for discarding the token/cookie.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                   example: "Logged out successfully"
+ */
+router.post('/logout', protect, authController.logout);
+
 module.exports = router;

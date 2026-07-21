@@ -174,6 +174,7 @@ class ReferralService {
       if (existingReferral) {
         return {
           success: false,
+          code: 'ALREADY_APPLIED',
           message: 'Referral code already applied'
         };
       }
@@ -210,6 +211,7 @@ class ReferralService {
       if (error.message.includes('already been referred')) {
         return {
           success: false,
+          code: 'ALREADY_APPLIED',
           message: error.message
         };
       }

@@ -58,7 +58,23 @@ class LeaderboardWorker {
     });
     
     this.jobs.push({ name: 'weekly-leaderboard', job: weeklyJob });
-    
+
+    // Generate monthly leaderboard every hour
+    const monthlyJob = cron.schedule('0 * * * *', async () => {
+      try {
+        logger.info('Running monthly leaderboard generation');
+        await leaderboardService.generateSnapshot('monthly');
+        logger.info('Monthly leaderboard generated successfully');
+      } catch (error) {
+        logger.error('Monthly leaderboard generation failed', {
+          error: error.message,
+          stack: error.stack
+        });
+      }
+    });
+
+    this.jobs.push({ name: 'monthly-leaderboard', job: monthlyJob });
+
     logger.info('Leaderboard worker started', {
       jobs: this.jobs.map(j => j.name)
     });
@@ -75,7 +91,8 @@ class LeaderboardWorker {
       await leaderboardService.generateSnapshot('all-time');
       await leaderboardService.generateSnapshot('daily');
       await leaderboardService.generateSnapshot('weekly');
-      
+      await leaderboardService.generateSnapshot('monthly');
+
       logger.info('Initial leaderboard snapshots generated');
     } catch (error) {
       logger.error('Failed to generate initial snapshots', {

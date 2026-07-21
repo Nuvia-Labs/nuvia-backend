@@ -248,3 +248,18 @@ exports.getMe = async (req, res) => {
     });
   }
 };
+
+// @desc    Logout current user
+// @route   POST /api/auth/logout
+// @access  Private
+exports.logout = async (req, res) => {
+  logger.info('User logged out', {
+    userId: req.user?.userId,
+    requestId: req.requestId
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Logged out successfully'
+  });
+};

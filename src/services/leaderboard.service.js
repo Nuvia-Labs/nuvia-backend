@@ -22,7 +22,7 @@ class LeaderboardService {
         // Build aggregation pipeline based on period
         let matchStage = {};
         
-        if (period === 'daily' || period === 'weekly') {
+        if (period === 'daily' || period === 'weekly' || period === 'monthly') {
           matchStage = {
             createdAt: {
               $gte: startAt,

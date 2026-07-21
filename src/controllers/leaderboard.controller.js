@@ -9,11 +9,11 @@ exports.getLeaderboard = async (req, res) => {
     const { period = 'all-time', limit = 100, skip = 0 } = req.query;
     
     // Validate period
-    const validPeriods = ['all-time', 'daily', 'weekly'];
+    const validPeriods = ['all-time', 'daily', 'weekly', 'monthly'];
     if (!validPeriods.includes(period)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid period. Must be one of: all-time, daily, weekly'
+        message: 'Invalid period. Must be one of: all-time, daily, weekly, monthly'
       });
     }
     
@@ -49,11 +49,11 @@ exports.getMyRank = async (req, res) => {
     const { period = 'all-time' } = req.query;
     
     // Validate period
-    const validPeriods = ['all-time', 'daily', 'weekly'];
+    const validPeriods = ['all-time', 'daily', 'weekly', 'monthly'];
     if (!validPeriods.includes(period)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid period. Must be one of: all-time, daily, weekly'
+        message: 'Invalid period. Must be one of: all-time, daily, weekly, monthly'
       });
     }
     
@@ -89,11 +89,11 @@ exports.getLatestSnapshot = async (req, res) => {
     const { period = 'all-time' } = req.query;
     
     // Validate period
-    const validPeriods = ['all-time', 'daily', 'weekly'];
+    const validPeriods = ['all-time', 'daily', 'weekly', 'monthly'];
     if (!validPeriods.includes(period)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid period. Must be one of: all-time, daily, weekly'
+        message: 'Invalid period. Must be one of: all-time, daily, weekly, monthly'
       });
     }
     
@@ -126,11 +126,11 @@ exports.generateSnapshot = async (req, res) => {
     const { period = 'all-time' } = req.body;
     
     // Validate period
-    const validPeriods = ['all-time', 'daily', 'weekly'];
+    const validPeriods = ['all-time', 'daily', 'weekly', 'monthly'];
     if (!validPeriods.includes(period)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid period. Must be one of: all-time, daily, weekly'
+        message: 'Invalid period. Must be one of: all-time, daily, weekly, monthly'
       });
     }
     

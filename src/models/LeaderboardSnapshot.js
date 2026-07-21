@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const leaderboardSnapshotSchema = new mongoose.Schema({
   period: {
     type: String,
-    enum: ['all-time', 'daily', 'weekly'],
+    enum: ['all-time', 'daily', 'weekly', 'monthly'],
     required: true,
     index: true
   },
@@ -70,6 +70,9 @@ leaderboardSnapshotSchema.statics.createSnapshot = async function(period) {
     endAt = new Date(startAt);
     endAt.setDate(endAt.getDate() + 6);
     endAt.setHours(23, 59, 59, 999);
+  } else if (period === 'monthly') {
+    startAt = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    endAt = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
   }
   
   const snapshot = await this.create({
